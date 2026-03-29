@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Test</title>
+    <style>
+        body { font-family: Georgia, serif; background: #1a1210; color: #c9a84c; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .box { text-align: center; padding: 40px; border: 2px solid #c9a84c; border-radius: 12px; max-width: 500px; width: 90%; }
+        button { background: #2a1a0a; color: #c9a84c; border: 1px solid #c9a84c; padding: 10px 24px; font-family: Georgia; font-size: 14px; cursor: pointer; border-radius: 4px; margin-top: 20px; }
+        #result { margin-top: 20px; font-size: 13px; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>BardBoxFX — CORS Test</h2>
+        <p>Testing 3 proxies against monochrome.tf</p>
+        <button onclick="testAll()">Run Test</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        const target = 'https://monochrome.tf/track/371191195';
+        const proxies = [
+            { name: 'corsproxy.io', url: 'https://corsproxy.io/?' + encodeURIComponent(target) },
+            { name: 'allorigins.win', url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(target) },
+            { name: 'cors.sh', url: 'https://proxy.cors.sh/' + target },
+        ];
+
+        async function testProxy(proxy) {
+            try {
+                const res = await fetch(proxy.url);
+                if (!res.ok) return { name: proxy.name, ok: false, msg: 'HTTP ' + res.status };
+                return { name: proxy.name, ok: true, msg: 'Status ' + res.status + ' | ' + res.headers.get('content-type') };
+            } catch(e) {
+                return { name: proxy.name, ok: false, msg: e.message };
+            }
+        }
+
+        async function testAll() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<p style="color:#c9a84c">Testing all proxies...</p>';
+            const results = await Promise.all(proxies.map(testProxy));
+            result.innerHTML = results.map(r =>
+                `<div style="margin:8px 0; color:${r.ok ? '#4caf50' : '#cc4444'}">
+                    ${r.ok ? '✓' : '✗'} <strong>${r.name}</strong>: ${r.msg}
+                </div>`
+            ).join('');
+        }
+    </script>
+</body>
+</html>
