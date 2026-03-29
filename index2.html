@@ -26,39 +26,46 @@
       border-radius: 10px;
       padding: 24px;
       width: 100%;
-      max-width: 700px;
+      max-width: 640px;
       margin-bottom: 20px;
     }
     .card h2 { color: gold; font-size: 0.85rem; margin-bottom: 14px; letter-spacing: 0.08em; text-transform: uppercase; }
     .step-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
 
 ```
-/* iframe container with crop */
-.iframe-wrap {
-  width: 100%;
-  height: 180px;
-  overflow: hidden;
-  border-radius: 8px;
+.resource-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.resource-links a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0b0b0b;
   border: 1px solid #2a2a2a;
-  position: relative;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #c9a84c;
+  text-decoration: none;
+  font-size: 13px;
+  transition: border-color 0.15s;
 }
-.iframe-wrap iframe {
-  width: 140%;
-  margin-left: -20%;
-  height: 900px;
-  border: none;
-  margin-top: -290px;
+.resource-links a:hover { border-color: gold; }
+.resource-links a .icon { font-size: 1.1rem; }
+.resource-links a .desc { font-size: 11px; color: #555; margin-top: 2px; }
+
+.disclaimer {
+  font-size: 11px;
+  color: #444;
+  border: 1px solid #1e1e1e;
+  border-radius: 6px;
+  padding: 10px 12px;
+  line-height: 1.6;
+  margin-bottom: 4px;
 }
 
-.hint {
-  font-size: 12px;
-  color: #555;
-  margin-top: 10px;
-  text-align: center;
-}
-.hint a { color: #886600; }
-
-/* Drop zone */
 .dropzone {
   border: 2px dashed #333;
   border-radius: 8px;
@@ -75,7 +82,7 @@
   position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
 }
 .dropzone .icon { font-size: 1.8rem; margin-bottom: 8px; }
-.dropzone .hint2 { font-size: 11px; color: #444; margin-top: 6px; }
+.dropzone .hint { font-size: 11px; color: #444; margin-top: 6px; }
 
 .divider {
   display: flex; align-items: center; gap: 12px;
@@ -118,7 +125,6 @@ button.active { background: #3a2800; border-color: gold; }
 #status { font-size: 13px; margin-top: 12px; min-height: 18px; color: #888; }
 #status.error { color: #e05555; }
 #status.success { color: #4caf50; }
-
 #track-name { font-size: 12px; color: #666; margin-top: 8px; font-style: italic; }
 
 audio { width: 100%; margin-top: 14px; accent-color: gold; }
@@ -145,6 +151,7 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
 .vol-row label { font-size: 13px; color: #aaa; margin-right: 4px; }
 
 #download-btn { margin-top: 16px; width: 100%; padding: 12px; font-size: 14px; }
+#share-btn { margin-top: 8px; width: 100%; padding: 12px; font-size: 14px; display: none; }
 ```
 
   </style>
@@ -152,36 +159,81 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
 <body>
 
   <h1>BardBoxFX</h1>
-  <p class="subtitle">Convert · Trim · Boost · Download</p>
+  <p class="subtitle">Trim · Boost · Download</p>
 
-  <!-- STEP 1: Convert -->
+  <!-- STEP 1: Get a track -->
 
   <div class="card">
-    <h2>Step 1 — Find &amp; Convert a Track</h2>
-    <p class="step-label">Paste a YouTube URL below and download the MP3</p>
-    <div class="iframe-wrap">
-      <iframe src="https://ezconv.cc/" scrolling="no" title="YouTube to MP3 Converter"></iframe>
+    <h2>Step 1 — Get a Track</h2>
+    <p class="step-label">Use one of these sites to find and download your MP3</p>
+
+```
+<div class="resource-links">
+  <a href="https://ezconv.cc/" target="_blank">
+    <span class="icon">🎵</span>
+    <div>
+      <div>EZConv</div>
+      <div class="desc">YouTube to MP3 — paste a YouTube link and download</div>
     </div>
-    <p class="hint">After converting, download the MP3 — then drop it into Step 2 below.</p>
+  </a>
+  <a href="https://www.soundcloud.com" target="_blank">
+    <span class="icon">☁️</span>
+    <div>
+      <div>SoundCloud</div>
+      <div class="desc">Stream and download free tracks across all genres</div>
+    </div>
+  </a>
+  <a href="https://freemusicarchive.org/" target="_blank">
+    <span class="icon">🎼</span>
+    <div>
+      <div>Free Music Archive</div>
+      <div class="desc">Royalty-free music — safe for personal use</div>
+    </div>
+  </a>
+  <a href="https://monochrome.tf" target="_blank">
+    <span class="icon">🎧</span>
+    <div>
+      <div>Monochrome.tf</div>
+      <div class="desc">Music streaming and discovery</div>
+    </div>
+  </a>
+  <a href="https://lucida.to" target="_blank">
+    <span class="icon">⬇️</span>
+    <div>
+      <div>Lucida.to</div>
+      <div class="desc">Download music from streaming platforms</div>
+    </div>
+  </a>
+</div>
+
+<div style="text-align:center; margin: 4px 0 12px;">
+  <a href="#step2" style="color:#555; font-size:12px; text-decoration:none;">Already have a file? Skip to Step 2 ↓</a>
+</div>
+<div class="disclaimer">
+  ⚠️ These are third-party websites. BardBoxFX is not affiliated with, responsible for, or in control of any external site listed above. Use them at your own discretion.
+</div>
+```
+
   </div>
 
   <!-- STEP 2: Load -->
 
-  <div class="card">
+  <div class="card" id="step2">
     <h2>Step 2 — Load Your Track</h2>
-    <p class="step-label">Drop a file — or right-click the Download MP3 button above, copy the link, and paste it below</p>
-    <div class="dropzone" id="dropzone">
-      <input type="file" id="file-input" accept=".mp3,.wav,.flac,audio/*"/>
-      <div class="icon">🎵</div>
-      <div>Drop MP3, WAV, or FLAC here</div>
-      <div class="hint2">or click to browse</div>
-    </div>
+    <p class="step-label">Drop your downloaded file here, or paste a direct .mp3 / .wav / .flac link</p>
 
 ```
-<div class="divider">or paste a download link</div>
+<div class="dropzone" id="dropzone">
+  <input type="file" id="file-input" accept=".mp3,.wav,.flac,audio/*"/>
+  <div class="icon">🎵</div>
+  <div>Drop MP3, WAV, or FLAC here</div>
+  <div class="hint">or click to browse</div>
+</div>
+
+<div class="divider">or paste a direct audio link</div>
 
 <div class="row">
-  <input type="text" id="url-input" placeholder="Paste download link from converter above..."/>
+  <input type="text" id="url-input" placeholder="https://example.com/track.mp3"/>
   <button id="load-url-btn" onclick="loadFromUrl()">Load</button>
 </div>
 
@@ -220,7 +272,7 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
 </div>
 
 <button id="download-btn" onclick="downloadMp3()">⬇ Download MP3</button>
-<button id="share-btn" onclick="shareMp3()" style="margin-top:8px; width:100%; padding:12px; font-size:14px; display:none;">↑ Share / Save to Files</button>
+<button id="share-btn" onclick="shareMp3()">↑ Share / Save to Files</button>
 ```
 
   </div>
@@ -233,20 +285,6 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
     let trimEnd = 0;
     let dragging = null;
     let volumeBoostDb = 0;
-
-    async function shareMp3() {
-      if (!lastBlob) return;
-      const file = new File([lastBlob], 'bardfx_trim.mp3', { type: 'audio/mp3' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: 'BardBoxFX Trim' });
-        } catch(e) {
-          if (e.name !== 'AbortError') setStatus('Share failed: ' + e.message, 'error');
-        }
-      } else {
-        setStatus('Share not supported on this browser — use Download instead.', 'error');
-      }
-    }
 
     function setStatus(msg, type) {
       const el = document.getElementById('status');
@@ -281,8 +319,7 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
       }
       setStatus('Loading...', '');
       document.getElementById('track-name').textContent = file.name;
-      const blobUrl = URL.createObjectURL(file);
-      loadAudio(blobUrl);
+      loadAudio(URL.createObjectURL(file));
       const reader = new FileReader();
       reader.onload = e => decodeAndDraw(e.target.result);
       reader.readAsArrayBuffer(file);
@@ -291,21 +328,18 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
     async function loadFromUrl() {
       const url = document.getElementById('url-input').value.trim();
       if (!url) return setStatus('Paste a URL first.', 'error');
-
       setStatus('Fetching...', '');
       const btn = document.getElementById('load-url-btn');
       btn.disabled = true;
       try {
-        // Try direct first, fall back to proxy
         let res = await fetch(url).catch(() => null);
         if (!res || !res.ok) {
-          const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-          res = await fetch(proxied);
+          res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
         }
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const blob = await res.blob();
         if (blob.size < 1000) throw new Error('File too small — check the URL');
-        const filename = url.split('/').pop().split('?')[0];
+        const filename = url.split('/').pop().split('?')[0] || 'track';
         document.getElementById('track-name').textContent = filename;
         loadAudio(URL.createObjectURL(blob));
         decodeAndDraw(await blob.arrayBuffer());
@@ -328,6 +362,7 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
         document.getElementById('end-time').value = formatTime(duration);
         updateOverlay();
         document.getElementById('trim-card').style.display = 'block';
+        document.getElementById('share-btn').style.display = 'none';
         setStatus('Ready!', 'success');
       };
       player.onerror = () => setStatus('Could not load audio.', 'error');
@@ -491,19 +526,32 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
         const flush = mp3enc.flush();
         if (flush.length > 0) mp3Data.push(new Int8Array(flush));
 
-        const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+        lastBlob = new Blob(mp3Data, { type: 'audio/mp3' });
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
+        a.href = URL.createObjectURL(lastBlob);
         a.download = 'bardfx_trim.mp3';
         a.click();
         setStatus('Downloaded!', 'success');
-        lastBlob = blob;
         document.getElementById('share-btn').style.display = 'block';
       } catch(e) {
         setStatus('Export failed: ' + e.message, 'error');
       } finally {
         btn.disabled = false;
         btn.textContent = '⬇ Download MP3';
+      }
+    }
+
+    async function shareMp3() {
+      if (!lastBlob) return;
+      const file = new File([lastBlob], 'bardfx_trim.mp3', { type: 'audio/mp3' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'BardBoxFX Trim' });
+        } catch(e) {
+          if (e.name !== 'AbortError') setStatus('Share failed: ' + e.message, 'error');
+        }
+      } else {
+        setStatus('Share not supported on this browser — use Download instead.', 'error');
       }
     }
   </script>
