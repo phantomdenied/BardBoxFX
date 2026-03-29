@@ -151,7 +151,8 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
 .vol-row label { font-size: 13px; color: #aaa; margin-right: 4px; }
 
 #download-btn { margin-top: 16px; width: 100%; padding: 12px; font-size: 14px; }
-#share-btn { margin-top: 8px; width: 100%; padding: 12px; font-size: 14px; display: none; }
+#share-btn { margin-top: 16px; width: 100%; padding: 12px; font-size: 14px; }
+#download-btn { margin-top: 8px; }
 ```
 
   </style>
@@ -362,7 +363,7 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
         document.getElementById('end-time').value = formatTime(duration);
         updateOverlay();
         document.getElementById('trim-card').style.display = 'block';
-        document.getElementById('share-btn').style.display = 'none';
+
         setStatus('Ready!', 'success');
       };
       player.onerror = () => setStatus('Could not load audio.', 'error');
@@ -532,7 +533,7 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
         a.download = 'bardfx_trim.mp3';
         a.click();
         setStatus('Downloaded!', 'success');
-        document.getElementById('share-btn').style.display = 'block';
+
       } catch(e) {
         setStatus('Export failed: ' + e.message, 'error');
       } finally {
@@ -542,6 +543,8 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
     }
 
     async function shareMp3() {
+      if (!audioBuffer) return setStatus("Trim your track first.", "error");
+      if (!lastBlob) await downloadMp3();
       if (!lastBlob) return;
       const file = new File([lastBlob], 'bardfx_trim.mp3', { type: 'audio/mp3' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
