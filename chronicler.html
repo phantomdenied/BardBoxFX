@@ -160,14 +160,6 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
     <span class="icon">🎵</span>
     <div><div>EZConv</div><div class="desc">YouTube to MP3 — paste a link and download</div></div>
   </a>
-  <a href="https://www.soundcloud.com" target="_blank">
-    <span class="icon">☁️</span>
-    <div><div>SoundCloud</div><div class="desc">Stream and download free tracks across all genres</div></div>
-  </a>
-  <a href="https://freemusicarchive.org/" target="_blank">
-    <span class="icon">🎼</span>
-    <div><div>Free Music Archive</div><div class="desc">Royalty-free music — safe for personal use</div></div>
-  </a>
   <a href="https://monochrome.tf" target="_blank">
     <span class="icon">🎧</span>
     <div><div>Monochrome.tf</div><div class="desc">Music streaming and discovery</div></div>
@@ -261,6 +253,20 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
 
   <script>
     let audioBuffer = null;
+
+    // Load default intro track
+    window.addEventListener('load', () => {
+      fetch('Bardbox-intro.mp3').then(r => {
+        if (!r.ok) return;
+        r.blob().then(blob => {
+          document.getElementById('track-name').textContent = 'Bardbox-intro.mp3';
+          loadAudio(URL.createObjectURL(blob), true);
+          const reader = new FileReader();
+          reader.onload = e => decodeAndDraw(e.target.result);
+          reader.readAsArrayBuffer(blob);
+        });
+      }).catch(() => {});
+    });
     let lastBlob = null;
     let duration = 0;
     let trimStart = 0;
@@ -298,7 +304,7 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
       if (!['mp3','wav','flac'].includes(ext)) return setStatus('Only MP3, WAV, and FLAC supported.', 'error');
       setStatus('Loading...', '');
       document.getElementById('track-name').textContent = file.name;
-      loadAudio(URL.createObjectURL(file));
+      loadAudio(URL.createObjectURL(file), false);
       const reader = new FileReader();
       reader.onload = e => decodeAndDraw(e.target.result);
       reader.readAsArrayBuffer(file);
@@ -318,7 +324,7 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
         if (blob.size < 1000) throw new Error('File too small — check the URL');
         const filename = url.split('/').pop().split('?')[0] || 'track';
         document.getElementById('track-name').textContent = filename;
-        loadAudio(URL.createObjectURL(blob));
+        loadAudio(URL.createObjectURL(blob), false);
         decodeAndDraw(await blob.arrayBuffer());
       } catch(e) {
         setStatus('Error: ' + e.message, 'error');
@@ -327,7 +333,7 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
       }
     }
 
-    function loadAudio(src) {
+    function loadAudio(src, autoplay) {
       lastBlob = null;
       const player = document.getElementById('player');
       player.src = src;
@@ -344,6 +350,7 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
         document.getElementById('reset-section').style.display = 'none';
         setStatus('Ready!', 'success');
         player.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (autoplay) player.play().catch(() => {});
       };
       player.onerror = () => setStatus('Could not load audio.', 'error');
 
@@ -604,6 +611,8 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
       setStatus('', '');
       setVolume(0);
       document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Reload default
+      fetch('Bardbox-intro.mp3').then(r => { if (!r.ok) return; r.blob().then(blob => { document.getElementById('track-name').textContent = 'Bardbox-intro.mp3'; loadAudio(URL.createObjectURL(blob), false); const reader = new FileReader(); reader.onload = e => decodeAndDraw(e.target.result); reader.readAsArrayBuffer(blob); }); }).catch(() => {});
     }
   </script>
 
