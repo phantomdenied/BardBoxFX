@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BardBoxFX — Track Tool</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.all.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, serif;
+      background: #0b0b0b;
+      color: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 { color: gold; font-size: 2rem; margin-bottom: 6px; }
+    .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 40px; }
+    .card {
+      background: #141414;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 24px;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 20px;
+    }
+    .card h2 { color: gold; font-size: 0.85rem; margin-bottom: 14px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .step-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+    /* iframe container with crop */
+    .iframe-wrap {
+      width: 100%;
+      height: 300px;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid #2a2a2a;
+      position: relative;
+    }
+    .iframe-wrap iframe {
+      width: 140%;
+      margin-left: -20%;
+      height: 900px;
+      border: none;
+      margin-top: -290px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #555;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .hint a { color: #886600; }
+
+    /* Drop zone */
+    .dropzone {
+      border: 2px dashed #333;
+      border-radius: 8px;
+      padding: 28px 20px;
+      text-align: center;
+      color: #555;
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      position: relative;
+    }
+    .dropzone:hover, .dropzone.over { border-color: gold; color: #aaa; }
+    .dropzone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .dropzone .icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .dropzone .hint2 { font-size: 11px; color: #444; margin-top: 6px; }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 16px 0; color: #444; font-size: 12px;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #2a2a2a; }
+
+    input[type="text"] {
+      width: 100%;
+      background: #0b0b0b;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #f5f5f5;
+      font-family: Georgia, serif;
+      font-size: 14px;
+      padding: 10px 14px;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: gold; }
+
+    .row { display: flex; gap: 10px; margin-top: 10px; align-items: center; }
+    .row input { flex: 1; }
+
+    button {
+      background: #1a1200;
+      color: gold;
+      border: 1px solid #664d00;
+      border-radius: 6px;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      padding: 9px 18px;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    button:hover { background: #2a2000; }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    button.active { background: #3a2800; border-color: gold; }
+
+    #status { font-size: 13px; margin-top: 12px; min-height: 18px; color: #888; }
+    #status.error { color: #e05555; }
+    #status.success { color: #4caf50; }
+
+    #track-name { font-size: 12px; color: #666; margin-top: 8px; font-style: italic; }
+
+    audio { width: 100%; margin-top: 14px; accent-color: gold; }
+
+    .waveform-wrap {
+      position: relative; width: 100%; height: 64px;
+      background: #0b0b0b; border: 1px solid #2a2a2a;
+      border-radius: 6px; margin-top: 14px;
+      overflow: hidden; cursor: col-resize;
+    }
+    canvas#waveform { width: 100%; height: 100%; display: block; }
+    .trim-overlay {
+      position: absolute; top: 0; bottom: 0;
+      background: rgba(255,200,0,0.12);
+      border-left: 2px solid gold; border-right: 2px solid gold;
+      pointer-events: none;
+    }
+
+    .trim-row { display: flex; gap: 10px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+    .trim-row label { font-size: 13px; color: #aaa; white-space: nowrap; }
+    .trim-row input[type="text"] { width: 72px; text-align: center; }
+
+    .vol-row { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+    .vol-row label { font-size: 13px; color: #aaa; margin-right: 4px; }
+
+    #download-btn { margin-top: 16px; width: 100%; padding: 12px; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <h1>BardBoxFX</h1>
+  <p class="subtitle">Convert · Trim · Boost · Download</p>
+
+  <!-- STEP 1: Convert -->
+  <div class="card">
+    <h2>Step 1 — Find &amp; Convert a Track</h2>
+    <p class="step-label">Paste a YouTube URL below and download the MP3</p>
+    <div class="iframe-wrap">
+      <iframe src="https://ezconv.cc/" scrolling="no" title="YouTube to MP3 Converter"></iframe>
+    </div>
+    <p class="hint">After converting, download the MP3 — then drop it into Step 2 below.</p>
+  </div>
+
+  <!-- STEP 2: Load -->
+  <div class="card">
+    <h2>Step 2 — Load Your Track</h2>
+    <p class="step-label">Drop the downloaded file here</p>
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="file-input" accept=".mp3,.wav,.flac,audio/*"/>
+      <div class="icon">🎵</div>
+      <div>Drop MP3, WAV, or FLAC here</div>
+      <div class="hint2">or click to browse</div>
+    </div>
+
+    <div class="divider">or paste a direct audio link</div>
+
+    <div class="row">
+      <input type="text" id="url-input" placeholder="https://example.com/track.mp3"/>
+      <button id="load-url-btn" onclick="loadFromUrl()">Load</button>
+    </div>
+
+    <div id="status"></div>
+    <div id="track-name"></div>
+  </div>
+
+  <!-- STEP 3: Trim + Export -->
+  <div class="card" id="trim-card" style="display:none;">
+    <h2>Step 3 — Trim &amp; Export</h2>
+    <audio id="player" controls></audio>
+
+    <div class="waveform-wrap" id="waveform-wrap">
+      <canvas id="waveform"></canvas>
+      <div class="trim-overlay" id="trim-overlay"></div>
+    </div>
+
+    <div class="trim-row">
+      <label>Start</label>
+      <input type="text" id="start-time" value="0:00" oninput="updateTrimFromInputs()"/>
+      <label>End</label>
+      <input type="text" id="end-time" value="0:00" oninput="updateTrimFromInputs()"/>
+      <button onclick="previewTrim()">▶ Preview</button>
+    </div>
+
+    <div class="vol-row">
+      <label>Volume Boost:</label>
+      <button id="vol-0" class="active" onclick="setVolume(0)">Normal</button>
+      <button id="vol-2" onclick="setVolume(2)">+2 dB</button>
+      <button id="vol-4" onclick="setVolume(4)">+4 dB</button>
+      <button id="vol-6" onclick="setVolume(6)">+6 dB</button>
+    </div>
+
+    <button id="download-btn" onclick="downloadMp3()">⬇ Download MP3</button>
+  </div>
+
+  <script>
+    let audioBuffer = null;
+    let duration = 0;
+    let trimStart = 0;
+    let trimEnd = 0;
+    let dragging = null;
+    let volumeBoostDb = 0;
+
+    function setStatus(msg, type) {
+      const el = document.getElementById('status');
+      el.textContent = msg;
+      el.className = type || '';
+    }
+
+    function setVolume(db) {
+      volumeBoostDb = db;
+      [0,2,4,6].forEach(v => document.getElementById('vol-' + v).classList.toggle('active', v === db));
+    }
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('over'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('over');
+      const file = e.dataTransfer.files[0];
+      if (file) loadFile(file);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) loadFile(fileInput.files[0]);
+    });
+
+    function loadFile(file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!['mp3','wav','flac'].includes(ext)) {
+        return setStatus('Only MP3, WAV, and FLAC files are supported.', 'error');
+      }
+      setStatus('Loading...', '');
+      document.getElementById('track-name').textContent = file.name;
+      const blobUrl = URL.createObjectURL(file);
+      loadAudio(blobUrl);
+      const reader = new FileReader();
+      reader.onload = e => decodeAndDraw(e.target.result);
+      reader.readAsArrayBuffer(file);
+    }
+
+    async function loadFromUrl() {
+      const url = document.getElementById('url-input').value.trim();
+      if (!url) return setStatus('Paste a URL first.', 'error');
+      const ext = url.split('?')[0].split('.').pop().toLowerCase();
+      if (!['mp3','wav','flac'].includes(ext)) {
+        return setStatus('URL must end in .mp3, .wav, or .flac', 'error');
+      }
+      setStatus('Fetching...', '');
+      const btn = document.getElementById('load-url-btn');
+      btn.disabled = true;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const blob = await res.blob();
+        if (blob.size < 1000) throw new Error('File too small — check the URL');
+        const filename = url.split('/').pop().split('?')[0];
+        document.getElementById('track-name').textContent = filename;
+        loadAudio(URL.createObjectURL(blob));
+        decodeAndDraw(await blob.arrayBuffer());
+      } catch(e) {
+        setStatus('Error: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function loadAudio(src) {
+      const player = document.getElementById('player');
+      player.src = src;
+      player.load();
+      player.onloadedmetadata = () => {
+        duration = player.duration;
+        trimStart = 0;
+        trimEnd = duration;
+        document.getElementById('start-time').value = '0:00';
+        document.getElementById('end-time').value = formatTime(duration);
+        updateOverlay();
+        document.getElementById('trim-card').style.display = 'block';
+        setStatus('Ready!', 'success');
+      };
+      player.onerror = () => setStatus('Could not load audio.', 'error');
+    }
+
+    async function decodeAndDraw(arrayBuf) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        audioBuffer = await ctx.decodeAudioData(arrayBuf);
+        drawWaveform(audioBuffer);
+      } catch(e) {
+        console.warn('Waveform error:', e.message);
+      }
+    }
+
+    function drawWaveform(buf) {
+      const canvas = document.getElementById('waveform');
+      const wrap = document.getElementById('waveform-wrap');
+      const W = wrap.offsetWidth, H = 64;
+      canvas.width = W * window.devicePixelRatio;
+      canvas.height = H * window.devicePixelRatio;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      const data = buf.getChannelData(0);
+      const step = Math.floor(data.length / W);
+      ctx.clearRect(0, 0, W, H);
+      ctx.strokeStyle = '#b8902a';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < W; i++) {
+        let max = 0;
+        for (let j = 0; j < step; j++) {
+          const v = Math.abs(data[i * step + j] || 0);
+          if (v > max) max = v;
+        }
+        const h = max * H * 0.85;
+        ctx.beginPath();
+        ctx.moveTo(i, H / 2 - h / 2);
+        ctx.lineTo(i, H / 2 + h / 2);
+        ctx.stroke();
+      }
+    }
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60).toString().padStart(2, '0');
+      return m + ':' + sec;
+    }
+
+    function parseTime(str) {
+      const parts = str.split(':').map(Number);
+      if (parts.length === 2) return parts[0] * 60 + (parts[1] || 0);
+      return parseFloat(str) || 0;
+    }
+
+    function updateTrimFromInputs() {
+      trimStart = Math.max(0, parseTime(document.getElementById('start-time').value));
+      trimEnd = Math.min(duration, parseTime(document.getElementById('end-time').value));
+      updateOverlay();
+    }
+
+    function updateOverlay() {
+      if (!duration) return;
+      const wrap = document.getElementById('waveform-wrap');
+      const w = wrap.offsetWidth;
+      const overlay = document.getElementById('trim-overlay');
+      overlay.style.left = (trimStart / duration * w) + 'px';
+      overlay.style.width = Math.max(2, (trimEnd - trimStart) / duration * w) + 'px';
+    }
+
+    const wrapEl = document.getElementById('waveform-wrap');
+    wrapEl.addEventListener('mousedown', e => {
+      if (!duration) return;
+      const rect = wrapEl.getBoundingClientRect();
+      const t = ((e.clientX - rect.left) / rect.width) * duration;
+      dragging = Math.abs(t - trimStart) < Math.abs(t - trimEnd) ? 'start' : 'end';
+    });
+    window.addEventListener('mousemove', e => {
+      if (!dragging || !duration) return;
+      const rect = wrapEl.getBoundingClientRect();
+      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const t = (x / rect.width) * duration;
+      if (dragging === 'start') {
+        trimStart = Math.min(t, trimEnd - 0.5);
+        document.getElementById('start-time').value = formatTime(trimStart);
+      } else {
+        trimEnd = Math.max(t, trimStart + 0.5);
+        document.getElementById('end-time').value = formatTime(trimEnd);
+      }
+      updateOverlay();
+    });
+    window.addEventListener('mouseup', () => dragging = null);
+
+    wrapEl.addEventListener('touchstart', e => {
+      if (!duration) return;
+      const rect = wrapEl.getBoundingClientRect();
+      const t = ((e.touches[0].clientX - rect.left) / rect.width) * duration;
+      dragging = Math.abs(t - trimStart) < Math.abs(t - trimEnd) ? 'start' : 'end';
+    }, { passive: true });
+    window.addEventListener('touchmove', e => {
+      if (!dragging || !duration) return;
+      const rect = wrapEl.getBoundingClientRect();
+      const x = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
+      const t = (x / rect.width) * duration;
+      if (dragging === 'start') {
+        trimStart = Math.min(t, trimEnd - 0.5);
+        document.getElementById('start-time').value = formatTime(trimStart);
+      } else {
+        trimEnd = Math.max(t, trimStart + 0.5);
+        document.getElementById('end-time').value = formatTime(trimEnd);
+      }
+      updateOverlay();
+    }, { passive: true });
+    window.addEventListener('touchend', () => dragging = null);
+
+    function previewTrim() {
+      const player = document.getElementById('player');
+      player.currentTime = trimStart;
+      player.play();
+      const stop = () => {
+        if (player.currentTime >= trimEnd) {
+          player.pause();
+          player.removeEventListener('timeupdate', stop);
+        }
+      };
+      player.addEventListener('timeupdate', stop);
+    }
+
+    async function downloadMp3() {
+      if (!audioBuffer) return setStatus('Audio still loading — wait a moment.', 'error');
+      const btn = document.getElementById('download-btn');
+      btn.disabled = true;
+      btn.textContent = 'Encoding MP3...';
+      setStatus('Processing...');
+      try {
+        const sampleRate = audioBuffer.sampleRate;
+        const startSample = Math.floor(trimStart * sampleRate);
+        const endSample = Math.floor(trimEnd * sampleRate);
+        const length = endSample - startSample;
+        const numChannels = audioBuffer.numberOfChannels;
+        const gain = Math.pow(10, volumeBoostDb / 20);
+
+        function getChannel(ch) {
+          const raw = audioBuffer.getChannelData(ch).slice(startSample, endSample);
+          const out = new Int16Array(length);
+          for (let i = 0; i < length; i++) {
+            const s = Math.max(-1, Math.min(1, raw[i] * gain));
+            out[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+          }
+          return out;
+        }
+
+        const left = getChannel(0);
+        const right = numChannels > 1 ? getChannel(1) : left;
+        const mp3enc = new lamejs.Mp3Encoder(2, sampleRate, 128);
+        const blockSize = 1152;
+        const mp3Data = [];
+        for (let i = 0; i < length; i += blockSize) {
+          const buf = mp3enc.encodeBuffer(left.subarray(i, i + blockSize), right.subarray(i, i + blockSize));
+          if (buf.length > 0) mp3Data.push(new Int8Array(buf));
+        }
+        const flush = mp3enc.flush();
+        if (flush.length > 0) mp3Data.push(new Int8Array(flush));
+
+        const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'bardfx_trim.mp3';
+        a.click();
+        setStatus('Downloaded!', 'success');
+      } catch(e) {
+        setStatus('Export failed: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⬇ Download MP3';
+      }
+    }
+  </script>
+</body>
+</html>
