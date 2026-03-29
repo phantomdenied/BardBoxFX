@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Test</title>
+    <style>
+        body { font-family: Georgia, serif; background: #1a1210; color: #c9a84c; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .box { text-align: center; padding: 40px; border: 2px solid #c9a84c; border-radius: 12px; max-width: 600px; width: 90%; }
+        button { background: #2a1a0a; color: #c9a84c; border: 1px solid #c9a84c; padding: 10px 24px; font-family: Georgia; font-size: 14px; cursor: pointer; border-radius: 4px; margin-top: 20px; }
+        #result { margin-top: 20px; font-size: 13px; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>BardBoxFX — Source Dig</h2>
+        <p>Fetching track page and hunting for audio URL</p>
+        <button onclick="fetchSource()">Run</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        const target = 'https://monochrome.tf/track/371191195';
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(target);
+
+        async function fetchSource() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<p style="color:#c9a84c">Fetching page source...</p>';
+            try {
+                const res = await fetch(proxyUrl);
+                const html = await res.text();
+
+                const audioMatches = [
+                    ...html.matchAll(/https?:\/\/[^\s"'<>]+\.mp3[^\s"'<>]*/gi),
+                    ...html.matchAll(/https?:\/\/[^\s"'<>]+audio[^\s"'<>]*/gi),
+                    ...html.matchAll(/"file"\s*:\s*"(https?:\/\/[^\s"'<>]+)"/gi),
+                    ...html.matchAll(/"url"\s*:\s*"(https?:\/\/[^\s"'<>]+)"/gi),
+                    ...html.matchAll(/"stream"\s*:\s*"(https?:\/\/[^\s"'<>]+)"/gi),
+                    ...html.matchAll(/"src"\s*:\s*"(https?:\/\/[^\s"'<>]+)"/gi),
+                ];
+
+                const found = [...new Set(audioMatches.map(m => m[1] || m[0]))].filter(Boolean);
+
+                if (found.length > 0) {
+                    result.innerHTML = '<p style="color:#4caf50">✓ Possible audio URLs found:</p>' +
+                        found.map(u => `<div style="word-break:break-all; margin:6px 0; font-size:11px; color:#c9a84c">${u}</div>`).join('');
+                } else {
+                    result.innerHTML = '<p style="color:#cc4444">No audio URLs auto-detected. Raw source (first 4000 chars):</p>' +
+                        '<pre style="text-align:left; font-size:10px; color:#aaa; white-space:pre-wrap; word-break:break-all; max-height:400px; overflow-y:auto; background:#111; padding:10px; border-radius:6px;">' +
+                        html.substring(0, 4000).replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                        '</pre>';
+                }
+            } catch(e) {
+                result.innerHTML = '<p style="color:#cc4444">Failed: ' + e.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>
