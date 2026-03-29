@@ -8,6 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.all.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { overflow-x: hidden; max-width: 100%; }
     body {
       font-family: Georgia, serif;
       background: #0b0b0b;
@@ -19,7 +20,7 @@
       padding: 40px 20px;
     }
     h1 { color: gold; font-size: 2rem; margin-bottom: 6px; }
-    .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 40px; }
+    .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
     .card {
       background: #141414;
       border: 1px solid #333;
@@ -158,7 +159,7 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
 </head>
 <body>
 
-  <h1>BardBoxFX</h1>
+  <img src="bardbox-logo.png" alt="BardBoxFX" style="width:220px; max-width:70%; margin-bottom:10px; display:block;"/>
   <p class="subtitle">Trim · Boost · Download</p>
 
   <!-- STEP 1: Get a track -->
@@ -272,6 +273,7 @@ canvas#waveform { width: 100%; height: 100%; display: block; }
 </div>
 
 <button id="share-btn" onclick="shareMp3()">📲 Save to BardBoxFX</button>
+<p style="font-size:11px; color:#555; margin-top:8px; line-height:1.6;">On iPhone: tap <strong style="color:#777">Save to BardBoxFX</strong>, then choose <strong style="color:#777">Save to Files</strong>, and navigate to your BardBoxFX drive to save directly to the device.</p>
 <button id="download-btn" onclick="downloadMp3()">⬇ Download MP3</button>
 ```
 
