@@ -339,19 +339,18 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
       player.src = src;
       player.load();
       player.onloadedmetadata = () => {
-        duration = player.duration;
-        trimStart = 0;
-        trimEnd = duration;
-        document.getElementById('start-time').value = '0:00';
-        document.getElementById('end-time').value = formatTime(duration);
-        updateOverlay();
-        updateClipLength();
-        document.getElementById('trim-card').style.display = 'block';
-        document.getElementById('reset-section').style.display = 'none';
-        setStatus('Ready!', 'success');
-        player.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        if (autoplay) player.play().catch(() => {});
-      };
+  duration = player.duration;
+  trimStart = 0;
+  trimEnd = duration;
+  document.getElementById('start-time').value = '0:00';
+  document.getElementById('end-time').value = formatTime(duration);
+  updateOverlay();
+  updateClipLength();
+  document.getElementById('trim-card').style.display = 'block';
+  document.getElementById('reset-section').style.display = 'none';
+  setStatus('Ready!', 'success');
+  if (autoplay) player.play().catch(() => {});
+};
       player.onerror = () => setStatus('Could not load audio.', 'error');
 
       // Playhead tracking
