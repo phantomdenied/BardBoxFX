@@ -20,7 +20,6 @@
       padding: 10px 20px 50px 20px;
     }
 
-```
 .logo { width: 140px; max-width: 40%; margin-bottom: 4px; }
 .subtitle { color: #bbb; font-size: 0.85rem; margin-bottom: 28px; letter-spacing: 0.05em; }
 
@@ -132,14 +131,11 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
 .vol-row label { font-size: 12px; color: #ccc; margin-right: 2px; }
 
 .export-section { margin-top: 14px; border-top: 1px solid #1e1e1e; padding-top: 14px; }
-#share-btn { width: 100%; padding: 13px; font-size: 14px; margin-bottom: 8px; }
-.save-hint { font-size: 11px; color: #444; line-height: 1.6; margin-bottom: 10px; }
 #download-btn { width: 100%; padding: 11px; font-size: 13px; }
 
 .reset-section { margin-top: 10px; text-align: center; display: none; }
 .reset-section a { color: #444; font-size: 12px; text-decoration: none; cursor: pointer; }
 .reset-section a:hover { color: #ccc; }
-```
 
   </style>
 </head>
@@ -154,7 +150,6 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
     <h2>Step 1 — Get a Track</h2>
     <p class="step-label">Use one of these sites to find and download your MP3</p>
 
-```
 <div class="resource-links">
   <a href="https://ezconv.cc/" target="_blank">
     <span class="icon">🎵</span>
@@ -172,7 +167,6 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
 
 <div class="skip-link"><a href="#step2">Already have a file? Skip to Step 2 ↓</a></div>
 <div class="disclaimer">⚠️ These are third-party websites. BardBoxFX is not affiliated with, responsible for, or in control of any external site listed above. Use them at your own discretion.</div>
-```
 
   </div>
 
@@ -182,7 +176,6 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
     <h2>Step 2 — Load Your Track</h2>
     <p class="step-label">Drop your file here, or paste a direct audio link</p>
 
-```
 <div class="dropzone" id="dropzone">
   <input type="file" id="file-input" accept=".mp3,.wav,.flac,audio/*"/>
   <div class="dz-icon">🎵</div>
@@ -199,7 +192,6 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
 
 <div id="status"></div>
 <div id="track-name"></div>
-```
 
   </div>
 
@@ -208,7 +200,6 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
   <div class="card" id="trim-card" style="display:none;">
     <h2>Step 3 — Trim &amp; Export</h2>
 
-```
 <audio id="player" controls></audio>
 
 <div class="waveform-wrap" id="waveform-wrap">
@@ -239,15 +230,12 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
 </div>
 
 <div class="export-section">
-  <button id="share-btn" onclick="shareMp3()">📲 Save to BardBoxFX</button>
-  <p class="save-hint">On iPhone: tap Save to BardBoxFX → choose <strong>Save to Files</strong> → navigate to your BardBoxFX drive.</p>
   <button id="download-btn" onclick="downloadMp3()">⬇ Download MP3</button>
 </div>
 
 <div class="reset-section" id="reset-section">
   <a onclick="resetTool()">↩ Convert another track</a>
 </div>
-```
 
   </div>
 
@@ -339,18 +327,18 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
       player.src = src;
       player.load();
       player.onloadedmetadata = () => {
-  duration = player.duration;
-  trimStart = 0;
-  trimEnd = duration;
-  document.getElementById('start-time').value = '0:00';
-  document.getElementById('end-time').value = formatTime(duration);
-  updateOverlay();
-  updateClipLength();
-  document.getElementById('trim-card').style.display = 'block';
-  document.getElementById('reset-section').style.display = 'none';
-  setStatus('Ready!', 'success');
-  if (autoplay) player.play().catch(() => {});
-};
+        duration = player.duration;
+        trimStart = 0;
+        trimEnd = duration;
+        document.getElementById('start-time').value = '0:00';
+        document.getElementById('end-time').value = formatTime(duration);
+        updateOverlay();
+        updateClipLength();
+        document.getElementById('trim-card').style.display = 'block';
+        document.getElementById('reset-section').style.display = 'none';
+        setStatus('Ready!', 'success');
+        if (autoplay) player.play().catch(() => {});
+      };
       player.onerror = () => setStatus('Could not load audio.', 'error');
 
       // Playhead tracking
@@ -569,30 +557,6 @@ canvas#waveform { position: absolute; top: 0; left: 0; width: 100%; height: 100%
       } finally {
         btn.disabled = false;
         btn.textContent = '⬇ Download MP3';
-      }
-    }
-
-    async function shareMp3() {
-      if (!audioBuffer) return setStatus('Load a track first.', 'error');
-      const shareBtn = document.getElementById('share-btn');
-      shareBtn.disabled = true;
-      shareBtn.textContent = 'Encoding...';
-      try {
-        if (!lastBlob) lastBlob = encodeMp3();
-        if (!lastBlob) throw new Error('Encoding failed');
-        const file = new File([lastBlob], getFilename(), { type: 'audio/mp3' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'BardBoxFX' });
-          setStatus('Shared!', 'success');
-          document.getElementById('reset-section').style.display = 'block';
-        } else {
-          setStatus('Share not supported — use Download MP3 instead.', 'error');
-        }
-      } catch(e) {
-        if (e.name !== 'AbortError') setStatus('Share failed: ' + e.message, 'error');
-      } finally {
-        shareBtn.disabled = false;
-        shareBtn.textContent = '📲 Save to BardBoxFX';
       }
     }
 
