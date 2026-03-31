@@ -19,7 +19,6 @@
       padding: 30px 20px 60px;
     }
 
-```
 .logo {
   width: 220px;
   max-width: 65%;
@@ -117,6 +116,40 @@ ul li .bullet { color: gold; font-size: 1rem; }
 .chronicler-link .cl-desc { color: #666; font-size: 12px; }
 .chronicler-link .cl-arrow { color: #4a3600; font-size: 1.4rem; }
 
+/* NEW TOOL SECTION STYLES */
+.tool-card {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 18px 20px;
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 14px;
+}
+.tool-card h2 {
+  color: gold;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.tool-link {
+  display: block;
+  text-decoration: none;
+  background: #0b0b0b;
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: inherit;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.tool-link:hover {
+  border-color: gold;
+  transform: translateY(-1px);
+}
+.tool-title { color: gold; font-size: 14px; margin-bottom: 4px; }
+.tool-desc { color: #888; font-size: 12px; }
+
 footer {
   margin-top: 40px;
   font-size: 0.8rem;
@@ -124,7 +157,6 @@ footer {
   text-align: center;
   line-height: 1.8;
 }
-```
 
   </style>
 </head>
@@ -132,8 +164,6 @@ footer {
 
   <img src="bardbox-logo2.png" alt="BardBoxFX" width="140" style="width:140px !important; max-width:140px !important; height:auto; display:block; margin:0 auto 4px auto;"/>
   <p class="tagline">Every Game Deserves an Entrance.</p>
-
-  <!-- How It Works -->
 
   <div class="card">
     <h2>How It Works</h2>
@@ -144,8 +174,6 @@ footer {
     </ul>
   </div>
 
-  <!-- Set Up -->
-
   <div class="card">
     <h2>Set Up</h2>
     <ul>
@@ -155,8 +183,6 @@ footer {
       <li><span class="bullet">④</span> You're ready to duel</li>
     </ul>
   </div>
-
-  <!-- LED Status -->
 
   <div class="card">
     <h2>LED Status</h2>
@@ -179,8 +205,6 @@ footer {
     </div>
   </div>
 
-  <!-- Chronicler App Link -->
-
   <a href="chronicler.html" class="chronicler-link">
     <div class="cl-left">
       <span class="cl-icon">🎙️</span>
@@ -191,6 +215,18 @@ footer {
     </div>
     <span class="cl-arrow">›</span>
   </a>
+
+  <!-- NEW SECTION -->
+  <div class="tool-card">
+    <h2>My Other Tools</h2>
+
+    <a href="https://phantomdenied.github.io/Compare/index.html" target="_blank" class="tool-link">
+      <div class="tool-title">ManaBox Companion</div>
+      <div class="tool-desc">
+        Compare your deck list with ManaBox exports to see what you own and what you're missing.
+      </div>
+    </a>
+  </div>
 
   <footer>
     <p>Thank you for being an early supporter.</p>
