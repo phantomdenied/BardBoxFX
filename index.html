@@ -7,7 +7,6 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { overflow-x: hidden; max-width: 100vw; }
-
     body {
       font-family: Georgia, serif;
       background: #0b0b0b;
@@ -53,18 +52,17 @@
       text-transform: uppercase;
     }
 
-    .section-note {
-      color: #8f8f8f;
-      font-size: 12px;
-      line-height: 1.6;
-      margin-bottom: 10px;
+    .intro {
+      color: #b8b8b8;
+      font-size: 13px;
+      line-height: 1.65;
     }
 
     .tool-grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 12px;
-      margin-top: 6px;
+      margin-top: 10px;
     }
 
     .tool-link {
@@ -127,6 +125,13 @@
       color: #c9a84c;
     }
 
+    .section-note {
+      color: #8f8f8f;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 2px;
+    }
+
     .footer-note {
       width: 100%;
       max-width: 700px;
@@ -149,61 +154,39 @@
   <img src="bardbox-logo2.png" alt="BardBoxFX" class="logo" />
   <p class="subtitle">Toolbox</p>
 
-  <!-- MAIN TOOL -->
   <div class="card">
     <h2>Main Tool</h2>
-
     <div class="tool-grid">
       <a class="tool-link" href="chronicler.html">
         <div class="tool-top">
           <div class="tool-icon">🎵</div>
           <div class="tool-title">The Chronicler</div>
         </div>
-
         <div class="tool-desc">
-          Load a track, trim it, preview your clip, adjust volume, and export a clean MP3 for BardBoxFX.
+          Load a track, trim it down, preview the clip, adjust volume, and export a clean MP3 for your BardBoxFX setup.
         </div>
-
-        <div class="launch-pill">Launch →</div>
+        <div class="launch-pill">Launch Tool →</div>
       </a>
     </div>
   </div>
 
-  <!-- OTHER TOOLS -->
   <div class="card">
     <h2>My Other Tools</h2>
-
     <p class="section-note">
-      Additional utility apps. This section will expand as more tools are created.
+      A launcher for the rest of my utility apps. More tools can be added here over time.
     </p>
 
     <div class="tool-grid two-col">
-
       <a class="tool-link" href="https://phantomdenied.github.io/Compare/index.html" target="_blank" rel="noopener noreferrer">
         <div class="tool-top">
           <div class="tool-icon">🧙</div>
-          <div class="tool-title">ManaBox Companion</div>
+          <div class="tool-title">ManaBox Companion App</div>
         </div>
-
         <div class="tool-desc">
-          Compare your deck list with ManaBox exports to see what you own and what you're missing.
+          Compare a deck list against your ManaBox exports to see what cards you already have and what cards you still need.
         </div>
-
-        <div class="launch-pill">Launch →</div>
+        <div class="launch-pill">Open App →</div>
       </a>
-
-      <!-- Future tools go here -->
-      <!--
-      <a class="tool-link" href="#">
-        <div class="tool-top">
-          <div class="tool-icon">⚔️</div>
-          <div class="tool-title">Future Tool</div>
-        </div>
-        <div class="tool-desc">Description of next app.</div>
-        <div class="launch-pill">Launch →</div>
-      </a>
-      -->
-
     </div>
   </div>
 
